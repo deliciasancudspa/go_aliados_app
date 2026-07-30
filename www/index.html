@@ -297,7 +297,8 @@ window.sb = sb;
 
 // ── State ────────────────────────────────────────────────────
 let currentTab = 'dashboard';
-let currentUser = null;
+let currentUser = null;   // auth.users ID (de supabase.auth.getSession)
+let profileData = null;   // users table row (public schema)
 let storeData = null;
 let orderFilter = 'all';
 let allOrders = [];
@@ -370,7 +371,7 @@ async function doLogin() {
 async function doLogout() {
   debug('Logout');
   await sb.auth.signOut();
-  currentUser = null; storeData = null;
+  currentUser = null; profileData = null; storeData = null;
   document.getElementById('app').classList.remove('show');
   showAuth();
 }
@@ -399,13 +400,26 @@ async function initApp() {
 async function loadStoreData() {
   if (!currentUser) return;
   try {
-    debug('Loading store...');
-    const { data, error } = await sb.from('stores').select('*').eq('owner_id', currentUser.id).maybeSingle();
-    if (error) { debug('Store error: ' + error.message); return; }
-    storeData = data;
-    if (data) {
+    debug('Loading profile...');
+    // Primero: buscar el perfil en la tabla public.users usando auth_id
+    var { data: profile, error: perr } = await sb.from('users').select('*').eq('auth_id', currentUser.id).single();
+    if (perr || !profile) {
+      debug('Profile error: ' + (perr?perr.message:'no encontrado'));
+      return;
+    }
+    profileData = profile;
+    debug('Profile found: ' + profile.id.slice(0,8) + '...');
+
+    // Segundo: buscar la tienda con owner_id = profile.id
+    var { data: store, error: serr } = await sb.from('stores').select('*').eq('owner_id', profile.id).maybeSingle();
+    if (serr) { debug('Store error: ' + serr.message); return; }
+    storeData = store;
+    if (store) {
+      debug('Store found: ' + store.name);
       updateHeader();
       updateProfile();
+    } else {
+      debug('No store for profile.id=' + profile.id.slice(0,8));
     }
   } catch(e) {
     debug('Store exception: ' + e.message);
@@ -460,9 +474,9 @@ async function initFCM() {
 }
 
 async function saveFcmToken(token) {
-  if (!currentUser) return;
+  if (!profileData) return;
   try {
-    const { error } = await sb.from('users').update({ fcm_token: token }).eq('id', currentUser.id);
+    var { error } = await sb.from('users').update({ fcm_token: token }).eq('id', profileData.id);
     if (error) debug('Save token error: ' + error.message);
     else debug('Token saved');
   } catch(e) { debug('Save token exc: ' + e.message); }
