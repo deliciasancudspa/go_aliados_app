@@ -431,16 +431,16 @@ function updateHeader() {
   document.getElementById('header-name').textContent = storeData.name || 'Mi Negocio';
   document.getElementById('header-cat').textContent = storeData.category || '';
   const t = document.getElementById('online-toggle');
-  t.className = 'toggle ' + (storeData.is_online ? 'on' : 'off');
+  t.className = 'toggle ' + (storeData.is_open ? 'on' : 'off');
 }
 
 async function toggleOnline() {
   if (!storeData) return;
-  const newState = !storeData.is_online;
+  const newState = !storeData.is_open;
   try {
-    const { error } = await sb.from('stores').update({ is_online: newState }).eq('id', storeData.id);
+    const { error } = await sb.from('stores').update({ is_open: newState }).eq('id', storeData.id);
     if (error) { toast('Error', 'error'); return; }
-    storeData.is_online = newState;
+    storeData.is_open = newState;
     updateHeader(); updateProfile();
     toast(newState ? '🟢 En línea' : '⚫ Fuera de línea', newState?'success':'warning');
   } catch(e) { toast('Error de conexión', 'error'); }
@@ -507,7 +507,7 @@ async function loadDashboard() {
     // Pedidos de hoy
     var { data: orders, error: err1, count: ordersToday } = await sb
       .from('orders')
-      .select('*', { count: 'exact' })
+      .select('*, order_items(item_name,quantity,item_price)', { count: 'exact' })
       .eq('store_id', storeData.id)
       .gte('created_at', today)
       .order('created_at', { ascending: false });
@@ -521,10 +521,10 @@ async function loadDashboard() {
 
     // Productos activos
     var { count: activeProducts, error: err2 } = await sb
-      .from('products')
+      .from('menu_items')
       .select('*', { count: 'exact' })
       .eq('store_id', storeData.id)
-      .eq('is_active', true)
+      .eq('is_available', true)
       .limit(0);
 
     if (err2) { debug('Products count error: ' + err2.message); }
@@ -557,7 +557,7 @@ async function loadOrders() {
   if (!storeData) return;
   debug('Loading orders...');
   try {
-    var q = sb.from('orders').select('*').eq('store_id', storeData.id).order('created_at',{ascending:false}).limit(50);
+    var q = sb.from('orders').select('*, order_items(item_name,quantity,item_price)').eq('store_id', storeData.id).order('created_at',{ascending:false}).limit(50);
     if (orderFilter !== 'all') q = q.eq('status', orderFilter);
     var { data, error } = await q;
     if (error) {
@@ -616,9 +616,9 @@ function renderOrderCard(o, showActions) {
   var labels = {pending:'Pendiente',accepted:'Aceptado',preparing:'Preparando',ready:'Listo',assigned:'Asignado',pickup:'En retiro',in_transit:'En camino',delivered:'Entregado',cancelled:'Cancelado'};
   var badgeMap = {pending:'badge-pending',accepted:'badge-accepted',preparing:'badge-preparing',ready:'badge-ready',assigned:'badge-assigned',pickup:'badge-ready',in_transit:'badge-preparing',delivered:'badge-delivered',cancelled:'badge-cancelled'};
   var time = o.created_at ? new Date(o.created_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : '';
-  var items = [];
-  try { items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []); } catch(e){}
-  var itemNames = items.slice(0,3).map(function(i){return i.name || i.product_name || 'Producto'}).join(', ');
+  // order_items viene del join: order_items(item_name,quantity,item_price)
+  var items = o.order_items || [];
+  var itemNames = items.slice(0,3).map(function(i){return i.item_name || 'Producto'}).join(', ');
   if (items.length > 3) itemNames += ' +' + (items.length-3);
   var total = (o.total||0).toLocaleString('es-CL');
 
@@ -645,34 +645,40 @@ async function updateOrderStatus(orderId, newStatus) {
 
 // ── Catalog ──────────────────────────────────────────────────
 var catalogFilter = 'all';
+var catalogCats = {}; // id → name mapping
 async function loadCatalog() {
   if (!storeData) return;
   debug('Loading catalog...');
   try {
-    var { data, error } = await sb.from('products').select('*').eq('store_id',storeData.id).order('name').limit(100);
-    if (error) {
-      debug('Catalog error: ' + error.message);
+    // Cargar categorías y productos en paralelo
+    var catRes = await sb.from('menu_categories').select('id,name').eq('store_id',storeData.id).order('sort_order');
+    var prodRes = await sb.from('menu_items').select('*').eq('store_id',storeData.id).order('sort_order').limit(100);
+
+    if (catRes.error) { debug('Cats error: ' + catRes.error.message); }
+    if (prodRes.error) {
+      debug('Catalog error: ' + prodRes.error.message);
       document.getElementById('catalog-list').innerHTML = '';
       document.getElementById('catalog-empty').style.display = 'none';
       document.getElementById('catalog-error').style.display = 'block';
-      document.getElementById('catalog-error-msg').textContent = error.message;
+      document.getElementById('catalog-error-msg').textContent = prodRes.error.message;
       return;
     }
-    var products = data || [];
+    var cats = catRes.data || [];
+    var products = prodRes.data || [];
     document.getElementById('catalog-error').style.display = 'none';
 
-    var cats = [];
-    var seen = {};
-    products.forEach(function(p){
-      var c = p.category || 'Sin categoría';
-      if (!seen[c]) { seen[c]=true; cats.push(c); }
-    });
+    // Construir mapa de categorías id → name
+    catalogCats = {};
+    cats.forEach(function(c){ catalogCats[c.id] = c.name; });
 
+    // Construir filtros de categoría
+    var catNames = cats.map(function(c){ return c.name; });
     document.getElementById('catalog-filters').innerHTML =
       '<span class="filter-chip'+(catalogFilter==='all'?' active':'')+'" onclick="setCatalogFilter(\'all\')">Todos</span>'+
-      cats.map(function(c){return '<span class="filter-chip'+(catalogFilter===c?' active':'')+'" onclick="setCatalogFilter(\''+c.replace(/'/g,"\\'")+'\')">'+c+'</span>'}).join('');
+      catNames.map(function(cn){return '<span class="filter-chip'+(catalogFilter===cn?' active':'')+'" onclick="setCatalogFilter(\''+cn.replace(/'/g,"\\'")+'\')">'+cn+'</span>'}).join('');
 
-    var filtered = catalogFilter==='all' ? products : products.filter(function(p){return (p.category||'Sin categoría')===catalogFilter});
+    // Filtrar por categoría
+    var filtered = catalogFilter==='all' ? products : products.filter(function(p){return catalogCats[p.category_id]===catalogFilter});
 
     if (filtered.length === 0) {
       document.getElementById('catalog-list').innerHTML = '';
@@ -681,7 +687,8 @@ async function loadCatalog() {
       document.getElementById('catalog-empty').style.display = 'none';
       document.getElementById('catalog-list').innerHTML = filtered.map(function(p){
         var imgStyle = p.image_url ? 'background-image:url(\''+p.image_url+'\')' : '';
-        return '<div class="card"><div class="product-row"><div class="product-img" style="'+imgStyle+'">'+(p.image_url?'':'📦')+'</div><div class="product-info"><div class="product-name">'+p.name+'</div><div class="product-cat">'+(p.category||'Sin categoría')+' · '+(p.is_active?'Visible':'Oculto')+'</div></div><div style="text-align:right"><div class="product-price">$'+(p.price||0).toLocaleString('es-CL')+'</div><button class="prod-toggle '+(p.is_active?'on':'off')+'" onclick="toggleProduct(\''+p.id+'\','+!p.is_active+')" style="margin-top:4px"></button></div></div></div>';
+        var catName = catalogCats[p.category_id] || 'Sin categoría';
+        return '<div class="card"><div class="product-row"><div class="product-img" style="'+imgStyle+'">'+(p.image_url?'':(p.emoji||'📦'))+'</div><div class="product-info"><div class="product-name">'+p.name+'</div><div class="product-cat">'+catName+' · '+(p.is_available?'Visible':'Oculto')+'</div></div><div style="text-align:right"><div class="product-price">$'+(p.price||0).toLocaleString('es-CL')+'</div><button class="prod-toggle '+(p.is_available?'on':'off')+'" onclick="toggleProduct(\''+p.id+'\','+!p.is_available+')" style="margin-top:4px"></button></div></div></div>';
       }).join('');
     }
     debug('Catalog OK: ' + products.length);
@@ -698,7 +705,7 @@ function setCatalogFilter(f) { catalogFilter = f; loadCatalog(); }
 
 async function toggleProduct(id, active) {
   try {
-    var { error } = await sb.from('products').update({is_active:active}).eq('id',id);
+    var { error } = await sb.from('menu_items').update({is_available:active}).eq('id',id);
     if (error) { toast('Error: '+error.message,'error'); return; }
     toast(active?'Visible':'Oculto','success');
     loadCatalog();
@@ -709,7 +716,7 @@ async function toggleProduct(id, active) {
 function updateProfile() {
   if (!storeData) return;
   document.getElementById('prof-name').textContent = storeData.name || '—';
-  document.getElementById('prof-status').innerHTML = storeData.is_online
+  document.getElementById('prof-status').innerHTML = storeData.is_open
     ? '<span class="online-dot green"></span> En línea'
     : '<span class="online-dot gray"></span> Fuera de línea';
   document.getElementById('prof-cat').textContent = storeData.category || '—';
