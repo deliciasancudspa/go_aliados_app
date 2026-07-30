@@ -1,0 +1,23 @@
+{
+  "name": "go_aliados_app",
+  "version": "1.0.0",
+  "description": "Go Aliados — App Android para negocios asociados a Go Deli",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx cap sync android",
+    "open": "npx cap open android",
+    "sync": "npx cap sync android"
+  },
+  "keywords": [],
+  "author": "Go Deli",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/cli": "^8.4.2",
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/push-notifications": "^8.1.2"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}

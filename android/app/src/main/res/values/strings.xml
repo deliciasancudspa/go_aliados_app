@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Go Aliados</string>
+    <string name="title_activity_main">Go Aliados</string>
+    <string name="package_name">cl.godeli.aliados</string>
+    <string name="custom_url_scheme">cl.godeli.aliados</string>
+</resources>
