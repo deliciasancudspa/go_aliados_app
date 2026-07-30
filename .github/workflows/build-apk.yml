@@ -4,6 +4,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -53,20 +56,19 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease
 
-      - name: Find and rename APK
+      - name: Find APK
         id: apk
         run: |
           APK_PATH=$(find android/app/build/outputs -name "*.apk" -type f | head -1)
           cp "$APK_PATH" go-aliados.apk
           echo "path=go-aliados.apk" >> "$GITHUB_OUTPUT"
-          echo "APK copiado a: go-aliados.apk"
+          echo "APK: go-aliados.apk"
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: go-aliados-apk
-          path: ${{ steps.apk.outputs.path }}
-          if-no-files-found: error
+      - name: Delete old release (if exists)
+        run: |
+          gh release delete latest --yes --cleanup-tag 2>/dev/null || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publicar en GitHub Release
         uses: softprops/action-gh-release@v2
