@@ -4,25 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1A0033">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Go Aliados</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-/*══════════════════════════════════════════════════════════════════════════════
-  GO ALIADOS — App Mobile Nativa
-  Design System: GoDeli Brand (purple #9E00FF · orange #FF6B00 · dark #1A0033)
-══════════════════════════════════════════════════════════════════════════════*/
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --primary:#FF6B00;--secondary:#9E00FF;--dark:#1A0033;--accent:#FFB800;
+  --primary:#FF6B00;--secondary:#9E00FF;--dark:#1A0033;
   --success:#22C55E;--error:#EF4444;--warning:#F59E0B;
-  --bg:#F0F2F5;--surface:#fff;--text:#1A0033;
-  --muted:#6B7280;--border:#E5E7EB;
+  --bg:#F0F2F5;--surface:#fff;--text:#1A0033;--muted:#6B7280;--border:#E5E7EB;
   --radius:14px;--radius-sm:10px;--radius-lg:20px;
   --shadow:0 2px 8px rgba(0,0,0,0.06);
-  --shadow-lg:0 8px 24px rgba(0,0,0,0.10);
   --safe-bottom:env(safe-area-inset-bottom,0px);
 }
 body{
@@ -31,291 +22,166 @@ body{
   -webkit-tap-highlight-color:transparent;
   -webkit-font-smoothing:antialiased;
   overscroll-behavior:none;
-  user-select:none;
-  -webkit-user-select:none;
 }
-
-/*══════════════════════════════════════════════════════════════════════════════
-  SPLASH SCREEN
-══════════════════════════════════════════════════════════════════════════════*/
-#splash{
-  position:fixed;inset:0;z-index:9999;
-  background:linear-gradient(135deg,#1A0033 0%,#2D0055 50%,#1A0033 100%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  transition:opacity 0.4s,visibility 0.4s;
-}
+/* Splash */
+#splash{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1A0033 0%,#2D0055 50%,#1A0033 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.4s}
 #splash.hide{opacity:0;visibility:hidden;pointer-events:none}
-.splash-logo{font-size:72px;margin-bottom:16px;animation:splashPulse 2s ease-in-out infinite}
-.splash-title{color:#fff;font-size:28px;font-weight:900;letter-spacing:-0.5px;margin-bottom:6px}
-.splash-sub{color:rgba(255,255,255,0.5);font-size:14px}
-.splash-loader{margin-top:32px;width:48px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden}
-.splash-loader-bar{width:40%;height:100%;background:var(--primary);border-radius:2px;animation:splashBar 1.2s ease-in-out infinite}
-@keyframes splashPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.95)}}
-@keyframes splashBar{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+.splash-logo{font-size:72px;animation:pulse 2s ease-in-out infinite}
+.splash-title{color:#fff;font-size:28px;font-weight:900;margin-top:12px}
+.splash-sub{color:rgba(255,255,255,0.5);font-size:14px;margin-top:4px}
+.splash-debug{color:rgba(255,255,255,0.35);font-size:10px;margin-top:32px;font-family:monospace;text-align:center;max-width:280px}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.95)}}
 
-/*══════════════════════════════════════════════════════════════════════════════
-  AUTH SCREEN
-══════════════════════════════════════════════════════════════════════════════*/
-#auth-screen{
-  position:fixed;inset:0;z-index:8000;background:var(--bg);
-  display:none;flex-direction:column;
-  overflow-y:auto;
-}
+/* Auth */
+#auth-screen{position:fixed;inset:0;z-index:8000;background:var(--bg);display:none;flex-direction:column;overflow-y:auto}
 #auth-screen.show{display:flex}
-.auth-header{
-  background:linear-gradient(135deg,#1A0033 0%,#2D0055 100%);
-  padding:60px 24px 40px;text-align:center;
-  border-radius:0 0 32px 32px;
-  position:relative;overflow:hidden;
-}
-.auth-header::before{
-  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
-  background:radial-gradient(circle at 30% 70%,rgba(255,107,0,0.15) 0%,transparent 50%);
-}
-.auth-logo{font-size:56px;position:relative;z-index:1}
-.auth-title{color:#fff;font-size:26px;font-weight:900;position:relative;z-index:1;margin-top:8px}
-.auth-sub{color:rgba(255,255,255,0.6);font-size:14px;position:relative;z-index:1;margin-top:4px}
-.auth-body{padding:24px;flex:1}
-.auth-card{background:var(--surface);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-lg)}
-.auth-card label{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;margin-top:16px}
+.auth-header{background:linear-gradient(135deg,#1A0033 0%,#2D0055 100%);padding:56px 24px 36px;text-align:center;border-radius:0 0 32px 32px}
+.auth-logo{font-size:56px}
+.auth-title{color:#fff;font-size:24px;font-weight:900;margin-top:8px}
+.auth-sub{color:rgba(255,255,255,0.6);font-size:13px;margin-top:4px}
+.auth-body{padding:20px;flex:1}
+.auth-card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:0 8px 24px rgba(0,0,0,0.10)}
+.auth-card label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;margin-top:14px}
 .auth-card label:first-child{margin-top:0}
-.auth-card input{
-  width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius-sm);
-  font-size:16px;font-family:inherit;background:var(--bg);color:var(--text);
-  transition:border-color 0.2s;outline:none;
-}
+.auth-card input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:16px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;transition:border-color 0.2s}
 .auth-card input:focus{border-color:var(--secondary)}
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:14px 24px;border-radius:var(--radius);font-size:15px;font-weight:700;
-  border:none;cursor:pointer;transition:all 0.2s;font-family:inherit;
-  -webkit-tap-highlight-color:transparent;
-}
-.btn:active{transform:scale(0.97);opacity:0.9}
-.btn-primary{background:var(--primary);color:#fff;width:100%;margin-top:20px;font-size:16px;padding:16px}
-.btn-outline{background:transparent;border:2px solid var(--border);color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 24px;border-radius:var(--radius);font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn:active{transform:scale(0.97);opacity:0.85}
+.btn-primary{background:var(--primary);color:#fff;width:100%;margin-top:18px;font-size:16px;padding:15px}
 .btn-sm{padding:8px 16px;font-size:13px;border-radius:var(--radius-sm)}
 .btn-xs{padding:5px 12px;font-size:11px;border-radius:8px}
-.auth-error{background:#FEE2E2;color:#991B1B;padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;margin-top:12px;display:none}
-.auth-footer{text-align:center;padding:8px 24px 32px}
+.auth-error{background:#FEE2E2;color:#991B1B;padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;margin-top:12px;display:none;font-weight:600}
+.auth-footer{text-align:center;padding:8px 20px 32px}
 .auth-footer a{color:var(--secondary);text-decoration:none;font-weight:600;font-size:14px}
-.auth-footer span{color:var(--muted);font-size:14px}
+.auth-footer span{color:var(--muted);font-size:13px}
 
-/*══════════════════════════════════════════════════════════════════════════════
-  MAIN APP SHELL
-══════════════════════════════════════════════════════════════════════════════*/
+/* App shell */
 #app{display:none;flex-direction:column;height:100vh;height:100dvh}
 #app.show{display:flex}
-
-/* ── Header ── */
-.app-header{
-  background:linear-gradient(135deg,#1A0033 0%,#2D0055 100%);
-  padding:16px 20px calc(16px + var(--safe-bottom));
-  display:flex;align-items:center;justify-content:space-between;
-  color:#fff;flex-shrink:0;
-  padding-top:max(16px, env(safe-area-inset-top, 0px));
-}
+.app-header{background:linear-gradient(135deg,#1A0033 0%,#2D0055 100%);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex-shrink:0;padding-top:max(16px,env(safe-area-inset-top,0px))}
 .header-left{display:flex;align-items:center;gap:12px;min-width:0}
-.header-avatar{
-  width:40px;height:40px;background:var(--primary);border-radius:12px;
-  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
-}
+.header-avatar{width:40px;height:40px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .header-info{min-width:0}
 .header-name{font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.header-cat{font-size:11px;opacity:0.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.header-toggle{flex-shrink:0}
-.toggle{
-  width:50px;height:28px;border-radius:14px;border:none;cursor:pointer;
-  position:relative;transition:background 0.3s;flex-shrink:0;
-}
-.toggle.on{background:var(--success)}
-.toggle.off{background:#374151}
-.toggle::after{
-  content:'';position:absolute;top:3px;width:22px;height:22px;background:#fff;
-  border-radius:50%;transition:left 0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);
-}
-.toggle.on::after{left:25px}
-.toggle.off::after{left:3px}
+.header-cat{font-size:11px;opacity:0.6}
+.toggle{width:50px;height:28px;border-radius:14px;border:none;cursor:pointer;position:relative;transition:background 0.3s;flex-shrink:0}
+.toggle.on{background:var(--success)}.toggle.off{background:#374151}
+.toggle::after{content:'';position:absolute;top:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:left 0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle.on::after{left:25px}.toggle.off::after{left:3px}
 
-/* ── Main Content Area ── */
-.app-content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:16px}
+.app-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px}
 .app-content::-webkit-scrollbar{display:none}
 .section{display:none}
 .section.active{display:block}
 
-/* ── Bottom Navigation ── */
-.bottom-nav{
-  display:flex;background:var(--surface);border-top:1px solid var(--border);
-  padding-bottom:var(--safe-bottom);flex-shrink:0;
-  box-shadow:0 -2px 10px rgba(0,0,0,0.04);
-}
-.nav-tab{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:10px 4px;gap:4px;cursor:pointer;transition:all 0.15s;
-  -webkit-tap-highlight-color:transparent;position:relative;
-}
-.nav-tab:active{opacity:0.7}
-.nav-icon{font-size:22px;line-height:1;transition:transform 0.2s}
-.nav-label{font-size:11px;font-weight:600;color:var(--muted);transition:color 0.2s}
-.nav-tab.active .nav-icon{transform:translateY(-2px)}
+/* Bottom nav */
+.bottom-nav{display:flex;background:var(--surface);border-top:1px solid var(--border);padding-bottom:var(--safe-bottom);flex-shrink:0;box-shadow:0 -2px 10px rgba(0,0,0,0.04)}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;gap:3px;cursor:pointer;transition:all 0.15s;position:relative}
+.nav-tab:active{opacity:0.6}
+.nav-icon{font-size:21px;line-height:1}
+.nav-label{font-size:10px;font-weight:600;color:var(--muted)}
 .nav-tab.active .nav-label{color:var(--primary)}
-.nav-badge{
-  position:absolute;top:4px;right:calc(50% - 24px);min-width:18px;height:18px;
-  background:var(--error);color:#fff;font-size:10px;font-weight:800;
-  border-radius:9px;display:flex;align-items:center;justify-content:center;
-  padding:0 5px;animation:badgePulse 2s infinite;
-}
-@keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.nav-badge{position:absolute;top:3px;right:calc(50% - 22px);min-width:17px;height:17px;background:var(--error);color:#fff;font-size:10px;font-weight:800;border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 5px}
+.nav-badge.show{display:flex}
 
-/*══════════════════════════════════════════════════════════════════════════════
-  CARDS & COMPONENTS
-══════════════════════════════════════════════════════════════════════════════*/
-.card{background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
-.card-row{display:flex;align-items:center;gap:12px}
-
-/* KPI Grid */
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.kpi-card{
-  background:var(--surface);border-radius:var(--radius);padding:16px;
-  box-shadow:var(--shadow);position:relative;overflow:hidden;
-}
-.kpi-card .kpi-icon{font-size:28px;margin-bottom:6px}
-.kpi-card .kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
-.kpi-card .kpi-value{font-size:24px;font-weight:900;margin-top:2px}
-.kpi-card .kpi-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.kpi-accent::after{
-  content:'';position:absolute;top:0;left:0;width:100%;height:3px;
-  background:linear-gradient(90deg,var(--primary),var(--secondary));
-}
+/* Cards */
+.card{background:var(--surface);border-radius:var(--radius);padding:15px;box-shadow:var(--shadow);margin-bottom:10px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kpi-card{background:var(--surface);border-radius:var(--radius);padding:15px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi-card .kpi-icon{font-size:26px;margin-bottom:4px}
+.kpi-card .kpi-label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.kpi-card .kpi-value{font-size:22px;font-weight:900;margin-top:2px}
+.kpi-card .kpi-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.kpi-accent::after{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--primary),var(--secondary))}
 
 /* Orders */
-.order-card{cursor:pointer;transition:transform 0.15s}
-.order-card:active{transform:scale(0.98)}
-.order-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.order-id{font-size:12px;color:var(--muted);font-weight:600}
-.order-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px}
+.order-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.order-id{font-size:11px;color:var(--muted);font-weight:600}
+.order-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px}
 .badge-pending{background:#FEF3C7;color:#92400E}
 .badge-accepted{background:#DBEAFE;color:#1E40AF}
 .badge-preparing{background:#E0E7FF;color:#3730A3}
 .badge-ready{background:#D1FAE5;color:#065F46}
 .badge-assigned{background:#EDE9FE;color:#5B21B6}
-.badge-pickup{background:#FCE7F3;color:#9D174D}
 .badge-delivered{background:#DCFCE7;color:#166534}
 .badge-cancelled{background:#FEE2E2;color:#991B1B}
 .order-body{display:flex;justify-content:space-between;align-items:center}
 .order-customer{font-size:14px;font-weight:700}
-.order-items{font-size:12px;color:var(--muted);margin-top:2px}
-.order-total{font-size:16px;font-weight:900;color:var(--secondary)}
-.order-actions{display:flex;gap:8px;margin-top:12px}
+.order-items{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.order-total{font-size:15px;font-weight:900;color:var(--secondary)}
+.order-actions{display:flex;gap:7px;margin-top:10px}
 .order-actions .btn{flex:1}
 
 /* Products */
-.product-card{display:flex;align-items:center;gap:12px}
-.product-img{
-  width:56px;height:56px;border-radius:12px;background:var(--bg);
-  display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;
-  background-size:cover;background-position:center;
-}
+.product-row{display:flex;align-items:center;gap:12px}
+.product-img{width:52px;height:52px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;background-size:cover;background-position:center}
 .product-info{flex:1;min-width:0}
 .product-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .product-price{font-size:14px;font-weight:800;color:var(--primary)}
-.product-cat{font-size:11px;color:var(--muted)}
-.product-toggle{
-  width:44px;height:26px;border-radius:13px;border:none;cursor:pointer;
-  position:relative;transition:background 0.3s;flex-shrink:0;
-}
-.product-toggle.active{background:var(--success)}
-.product-toggle.inactive{background:#D1D5DB}
-.product-toggle::after{
-  content:'';position:absolute;top:2px;width:22px;height:22px;background:#fff;
-  border-radius:50%;transition:left 0.3s;box-shadow:0 1px 2px rgba(0,0,0,0.15);
-}
-.product-toggle.active::after{left:20px}
-.product-toggle.inactive::after{left:2px}
+.product-cat{font-size:10px;color:var(--muted)}
+.prod-toggle{width:44px;height:26px;border-radius:13px;border:none;cursor:pointer;position:relative;transition:background 0.3s;flex-shrink:0}
+.prod-toggle.on{background:var(--success)}.prod-toggle.off{background:#D1D5DB}
+.prod-toggle::after{content:'';position:absolute;top:2px;width:22px;height:22px;background:#fff;border-radius:50%;transition:left 0.3s;box-shadow:0 1px 2px rgba(0,0,0,0.15)}
+.prod-toggle.on::after{left:20px}.prod-toggle.off::after{left:2px}
 
-/* Filter tabs */
-.filter-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+/* Filter chips */
+.filter-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
 .filter-row::-webkit-scrollbar{display:none}
-.filter-chip{
-  padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);
-  background:var(--surface);font-size:12px;font-weight:700;white-space:nowrap;
-  cursor:pointer;transition:all 0.15s;flex-shrink:0;
-}
+.filter-chip{padding:6px 13px;border-radius:18px;border:1.5px solid var(--border);background:var(--surface);font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer;transition:all 0.15s;flex-shrink:0}
 .filter-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 
-/* Empty state */
-.empty-state{text-align:center;padding:48px 24px}
-.empty-icon{font-size:56px;margin-bottom:12px}
-.empty-title{font-size:16px;font-weight:700;margin-bottom:4px}
-.empty-sub{font-size:13px;color:var(--muted)}
+/* Empty & Error states */
+.empty-state{text-align:center;padding:40px 20px}
+.empty-icon{font-size:48px;margin-bottom:10px}
+.empty-title{font-size:15px;font-weight:700;margin-bottom:3px;color:var(--text)}
+.empty-sub{font-size:12px;color:var(--muted)}
+.error-state{text-align:center;padding:32px 20px}
+.error-state .empty-icon{font-size:40px}
+.retry-btn{background:var(--secondary);color:#fff;padding:10px 24px;border-radius:20px;border:none;font-size:13px;font-weight:700;margin-top:12px;cursor:pointer;font-family:inherit}
 
 /* Toast */
-.toast{
-  position:fixed;bottom:calc(80px + var(--safe-bottom));left:16px;right:16px;
-  padding:14px 18px;border-radius:var(--radius);color:#fff;font-size:14px;font-weight:600;
-  z-index:9000;transform:translateY(120px);transition:transform 0.3s ease;
-  box-shadow:var(--shadow-lg);text-align:center;
-}
+.toast{position:fixed;bottom:calc(80px + var(--safe-bottom));left:16px;right:16px;padding:13px 16px;border-radius:var(--radius);color:#fff;font-size:13px;font-weight:600;z-index:9000;transform:translateY(120px);transition:transform 0.3s;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.15)}
 .toast.show{transform:translateY(0)}
-.toast-success{background:var(--success)}
-.toast-error{background:var(--error)}
-.toast-warning{background:var(--warning);color:#1A0033}
+.toast-success{background:var(--success)}.toast-error{background:var(--error)}.toast-warning{background:var(--warning);color:#1A0033}
 
-/* Skeleton loading */
-.skeleton{background:linear-gradient(90deg,var(--bg) 0%,#E5E7EB 50%,var(--bg) 100%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+/* Debug bar */
+#debug-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#0f0;font-size:9px;font-family:monospace;padding:3px 8px;z-index:9998;display:none;max-height:60px;overflow-y:auto;line-height:1.4}
+#debug-bar.show{display:block}
+
+/* Skeleton */
+.skeleton{background:linear-gradient(90deg,#E5E7EB 0%,#F0F0F0 50%,#E5E7EB 100%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.skel-text{height:14px;margin-bottom:8px}
-.skel-text.short{width:60%}
-.skel-kpi{height:80px;border-radius:var(--radius)}
-.skel-card{height:100px;border-radius:var(--radius);margin-bottom:12px}
+.skel-kpi{height:75px;border-radius:var(--radius)}
 
-/* Profile section */
-.profile-section{margin-bottom:20px}
-.profile-section h3{font-size:14px;font-weight:800;margin-bottom:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
-.profile-row{
-  display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
-  background:var(--surface);cursor:pointer;transition:background 0.15s;
-}
+/* Profile */
+.profile-section{margin-bottom:18px}
+.profile-section h3{font-size:12px;font-weight:800;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
+.profile-row{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;background:var(--surface);cursor:pointer;transition:background 0.15s}
 .profile-row:first-of-type{border-radius:var(--radius) var(--radius) 0 0}
 .profile-row:last-of-type{border-radius:0 0 var(--radius) var(--radius)}
 .profile-row:only-of-type{border-radius:var(--radius)}
-.profile-row:active{background:var(--bg)}
 .profile-row+.profile-row{border-top:1px solid var(--border)}
-.profile-row-label{font-size:14px;font-weight:600}
-.profile-row-value{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.profile-row-arrow{color:var(--muted);font-size:14px}
-
-/* Logout button */
-.btn-logout{
-  width:100%;margin-top:8px;background:transparent;border:2px solid var(--error);
-  color:var(--error);font-weight:700;font-size:14px;padding:14px;
-  border-radius:var(--radius);cursor:pointer;font-family:inherit;
-  transition:all 0.2s;
-}
+.profile-row-label{font-size:13px;font-weight:600}
+.profile-row-value{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.btn-logout{width:100%;margin-top:6px;background:transparent;border:2px solid var(--error);color:var(--error);font-weight:700;font-size:14px;padding:13px;border-radius:var(--radius);cursor:pointer;font-family:inherit;transition:all 0.15s}
 .btn-logout:active{background:var(--error);color:#fff}
-
-/* Online indicator dot */
-.online-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.online-dot.green{background:var(--success);animation:pulse 2s infinite}
+.online-dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.online-dot.green{background:var(--success);animation:dotPulse 2s infinite}
 .online-dot.gray{background:#9CA3AF}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:0.4}}
 </style>
 </head>
 <body>
 
-<!--══════════════════════════════════════════════════════════════════════════════
-  SPLASH
-══════════════════════════════════════════════════════════════════════════════-->
+<!-- SPLASH -->
 <div id="splash">
   <div class="splash-logo">🛵</div>
   <div class="splash-title">Go Aliados</div>
   <div class="splash-sub">Panel de negocio</div>
-  <div class="splash-loader"><div class="splash-loader-bar"></div></div>
+  <div class="splash-debug" id="splash-debug"></div>
 </div>
 
-<!--══════════════════════════════════════════════════════════════════════════════
-  LOGIN SCREEN
-══════════════════════════════════════════════════════════════════════════════-->
+<!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-header">
     <div class="auth-logo">🛵</div>
@@ -337,113 +203,95 @@ body{
   </div>
 </div>
 
-<!--══════════════════════════════════════════════════════════════════════════════
-  MAIN APP
-══════════════════════════════════════════════════════════════════════════════-->
+<!-- APP -->
 <div id="app">
-  <!-- Header -->
   <div class="app-header">
     <div class="header-left">
       <div class="header-avatar" id="header-avatar">🏪</div>
       <div class="header-info">
-        <div class="header-name" id="header-name">Mi Negocio</div>
-        <div class="header-cat" id="header-cat">Restaurante</div>
+        <div class="header-name" id="header-name">Cargando...</div>
+        <div class="header-cat" id="header-cat"></div>
       </div>
     </div>
     <button class="toggle on" id="online-toggle" onclick="toggleOnline()"></button>
   </div>
 
-  <!-- Content -->
   <div class="app-content" id="app-content">
     <!-- Dashboard -->
     <div class="section active" id="sec-dashboard">
-      <div class="kpi-grid" id="kpi-grid">
-        <div class="kpi-card kpi-accent"><div class="skeleton skel-kpi"></div></div>
-        <div class="kpi-card"><div class="skeleton skel-kpi"></div></div>
-        <div class="kpi-card"><div class="skeleton skel-kpi"></div></div>
-        <div class="kpi-card"><div class="skeleton skel-kpi"></div></div>
-      </div>
-      <h3 style="font-size:15px;font-weight:800;margin-bottom:10px">📦 Pedidos recientes</h3>
-      <div id="recent-orders"><div class="skeleton skel-card"></div><div class="skeleton skel-card"></div></div>
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:8px">📦 Pedidos recientes</h3>
+      <div id="recent-orders"></div>
     </div>
-
     <!-- Pedidos -->
     <div class="section" id="sec-pedidos">
       <div class="filter-row" id="order-filters"></div>
-      <div id="orders-list"><div class="skeleton skel-card"></div><div class="skeleton skel-card"></div></div>
-      <div class="empty-state" id="orders-empty" style="display:none">
-        <div class="empty-icon">📭</div><div class="empty-title">Sin pedidos</div><div class="empty-sub">Los pedidos nuevos aparecerán aquí</div>
-      </div>
+      <div id="orders-list"></div>
+      <div class="empty-state" id="orders-empty" style="display:none"><div class="empty-icon">📭</div><div class="empty-title">Sin pedidos</div><div class="empty-sub">Los pedidos nuevos aparecerán aquí</div></div>
+      <div class="error-state" id="orders-error" style="display:none"><div class="empty-icon">⚠️</div><div class="empty-title">Error al cargar</div><div class="empty-sub" id="orders-error-msg"></div><button class="retry-btn" onclick="loadOrders()">Reintentar</button></div>
     </div>
-
     <!-- Catálogo -->
     <div class="section" id="sec-catalogo">
       <div class="filter-row" id="catalog-filters"></div>
-      <div id="catalog-list"><div class="skeleton skel-card"></div><div class="skeleton skel-card"></div></div>
-      <div class="empty-state" id="catalog-empty" style="display:none">
-        <div class="empty-icon">📋</div><div class="empty-title">Sin productos</div><div class="empty-sub">Agrega productos desde el panel web</div>
-      </div>
+      <div id="catalog-list"></div>
+      <div class="empty-state" id="catalog-empty" style="display:none"><div class="empty-icon">📋</div><div class="empty-title">Sin productos</div><div class="empty-sub">Agrega productos desde el panel web</div></div>
+      <div class="error-state" id="catalog-error" style="display:none"><div class="empty-icon">⚠️</div><div class="empty-title">Error al cargar</div><div class="empty-sub" id="catalog-error-msg"></div><button class="retry-btn" onclick="loadCatalog()">Reintentar</button></div>
     </div>
-
     <!-- Perfil -->
     <div class="section" id="sec-perfil">
       <div class="profile-section">
         <h3>📱 Mi negocio</h3>
-        <div class="profile-row" onclick="showProfileField('name')">
-          <span class="profile-row-label">Nombre</span>
-          <span class="profile-row-value" id="prof-name">—</span>
-        </div>
-        <div class="profile-row" id="prof-online-row">
-          <span class="profile-row-label">Estado</span>
-          <span class="profile-row-value" id="prof-status">—</span>
-        </div>
-        <div class="profile-row">
-          <span class="profile-row-label">Categoría</span>
-          <span class="profile-row-value" id="prof-cat">—</span>
-        </div>
+        <div class="profile-row"><span class="profile-row-label">Nombre</span><span class="profile-row-value" id="prof-name">—</span></div>
+        <div class="profile-row"><span class="profile-row-label">Estado</span><span class="profile-row-value" id="prof-status">—</span></div>
+        <div class="profile-row"><span class="profile-row-label">Categoría</span><span class="profile-row-value" id="prof-cat">—</span></div>
       </div>
       <div class="profile-section">
         <h3>⚙️ Acciones</h3>
-        <div class="profile-row" onclick="window.open('https://godeli.cl/aliados','_blank')">
-          <span class="profile-row-label">Abrir panel completo</span>
-          <span class="profile-row-value profile-row-arrow">↗</span>
-        </div>
+        <div class="profile-row" onclick="window.open('https://godeli.cl/aliados','_blank')"><span class="profile-row-label">Abrir panel completo</span><span class="profile-row-value">↗</span></div>
       </div>
       <button class="btn-logout" onclick="doLogout()">Cerrar Sesión</button>
     </div>
   </div>
 
-  <!-- Bottom Nav -->
   <nav class="bottom-nav">
-    <div class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard',this)">
-      <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
-    </div>
-    <div class="nav-tab" data-tab="pedidos" onclick="switchTab('pedidos',this)">
-      <span class="nav-icon">📦</span><span class="nav-label">Pedidos</span>
-      <span class="nav-badge" id="orders-badge" style="display:none">0</span>
-    </div>
-    <div class="nav-tab" data-tab="catalogo" onclick="switchTab('catalogo',this)">
-      <span class="nav-icon">🏪</span><span class="nav-label">Catálogo</span>
-    </div>
-    <div class="nav-tab" data-tab="perfil" onclick="switchTab('perfil',this)">
-      <span class="nav-icon">⚙️</span><span class="nav-label">Perfil</span>
-    </div>
+    <div class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard',this)"><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></div>
+    <div class="nav-tab" data-tab="pedidos" onclick="switchTab('pedidos',this)"><span class="nav-icon">📦</span><span class="nav-label">Pedidos</span><span class="nav-badge" id="orders-badge">0</span></div>
+    <div class="nav-tab" data-tab="catalogo" onclick="switchTab('catalogo',this)"><span class="nav-icon">🏪</span><span class="nav-label">Catálogo</span></div>
+    <div class="nav-tab" data-tab="perfil" onclick="switchTab('perfil',this)"><span class="nav-icon">⚙️</span><span class="nav-label">Perfil</span></div>
   </nav>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
+<div id="debug-bar"></div>
 
-<!--══════════════════════════════════════════════════════════════════════════════
-  SCRIPTS
-══════════════════════════════════════════════════════════════════════════════-->
 <script>
+// ── Debug ─────────────────────────────────────────────────────
+const debugLines = [];
+function debug(msg) {
+  console.log('[GoAliados]', msg);
+  debugLines.push(new Date().toLocaleTimeString().slice(0,8) + ' ' + msg);
+  if (debugLines.length > 20) debugLines.shift();
+  const bar = document.getElementById('debug-bar');
+  bar.textContent = debugLines.join('\n');
+  bar.classList.add('show');
+  // También mostrar en splash si aún visible
+  document.getElementById('splash-debug').textContent = debugLines.slice(-3).join('\n');
+}
+debug('init v2');
+
 // ── Supabase ─────────────────────────────────────────────────
 const SUPA_URL = 'https://yxseolcaububyifhksud.supabase.co';
 const SUPA_KEY = 'sb_publishable_wc8oyi80Iu2RPgJr-9zS4g_DJ3l-3nV';
-const { createClient } = supabase;
-const sb = createClient(SUPA_URL, SUPA_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'godeli_aliados_auth' }
+
+if (typeof supabase === 'undefined') {
+  debug('ERROR: Supabase SDK no cargado');
+  document.getElementById('splash-debug').textContent = 'ERROR: SDK no disponible. Verifica conexión a internet.';
+} else {
+  debug('Supabase SDK ok');
+}
+
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'godeli_aliados_auth' }
 });
 window.sb = sb;
 
@@ -457,16 +305,23 @@ let unreadCount = 0;
 
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  // Verificar si ya hay sesión
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await initApp();
-  } else {
+  debug('DOM ready');
+  try {
+    const { data, error } = await sb.auth.getSession();
+    if (error) { debug('Session error: ' + error.message); showAuth(); return; }
+    if (data && data.session) {
+      currentUser = data.session.user;
+      debug('Session found: ' + currentUser.email);
+      await initApp();
+    } else {
+      debug('No session');
+      showAuth();
+    }
+  } catch(e) {
+    debug('Init error: ' + e.message);
     showAuth();
   }
-  // Ocultar splash
-  setTimeout(() => document.getElementById('splash').classList.add('hide'), 600);
+  setTimeout(() => document.getElementById('splash').classList.add('hide'), 500);
 });
 
 // ── Auth ─────────────────────────────────────────────────────
@@ -474,6 +329,7 @@ function showAuth() {
   document.getElementById('splash').classList.add('hide');
   document.getElementById('auth-screen').classList.add('show');
   document.getElementById('app').classList.remove('show');
+  debug('Showing auth');
 }
 
 function showApp() {
@@ -487,45 +343,52 @@ async function doLogin() {
   const password = document.getElementById('login-password').value;
   const errEl = document.getElementById('auth-error');
   const btn = document.getElementById('login-btn');
+  if (!email || !password) { errEl.textContent = 'Ingresa tu correo y contraseña'; errEl.style.display='block'; return; }
+  btn.disabled = true; btn.textContent = 'Iniciando sesión...'; errEl.style.display = 'none';
+  debug('Login: ' + email);
 
-  if (!email || !password) { showError('Ingresa tu correo y contraseña'); return; }
-
-  btn.disabled = true; btn.textContent = 'Iniciando sesión...';
-  errEl.style.display = 'none';
-
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  btn.disabled = false; btn.textContent = 'Iniciar Sesión';
-
-  if (error) {
-    showError(error.message === 'Invalid login credentials'
-      ? 'Correo o contraseña incorrectos' : error.message);
-    return;
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      debug('Login error: ' + error.message);
+      errEl.textContent = error.message === 'Invalid login credentials' ? 'Correo o contraseña incorrectos' : error.message;
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Iniciar Sesión';
+      return;
+    }
+    debug('Login OK');
+    currentUser = data.user;
+    await initApp();
+  } catch(e) {
+    debug('Login exception: ' + e.message);
+    errEl.textContent = 'Error de conexión. Verifica tu internet.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Iniciar Sesión';
   }
-  currentUser = data.user;
-  await initApp();
-}
-
-function showError(msg) {
-  const el = document.getElementById('auth-error');
-  el.textContent = msg; el.style.display = 'block';
 }
 
 async function doLogout() {
+  debug('Logout');
   await sb.auth.signOut();
   currentUser = null; storeData = null;
   document.getElementById('app').classList.remove('show');
   showAuth();
 }
 
+// ── Init App ─────────────────────────────────────────────────
 async function initApp() {
+  debug('Init app...');
   showApp();
-  // Cargar datos de la tienda
   await loadStoreData();
-  // Iniciar FCM nativo
+  if (!storeData) {
+    debug('WARN: No store found for user ' + currentUser.email);
+    document.getElementById('kpi-grid').innerHTML =
+      '<div class="error-state" style="grid-column:1/-1"><div class="empty-icon">🏪</div><div class="empty-title">Negocio no encontrado</div><div class="empty-sub">Tu usuario no tiene una tienda asociada. Contacta a soporte@godeli.cl</div></div>';
+    return;
+  }
+  debug('Store: ' + storeData.name);
   initFCM();
-  // Cargar dashboard
   loadDashboard();
-  // Polling de pedidos cada 30s
   setInterval(() => {
     if (currentTab === 'pedidos') loadOrders();
     if (currentTab === 'dashboard') loadDashboard();
@@ -535,77 +398,74 @@ async function initApp() {
 // ── Store Data ───────────────────────────────────────────────
 async function loadStoreData() {
   if (!currentUser) return;
-  const { data } = await sb.from('stores').select('*').eq('owner_id', currentUser.id).maybeSingle();
-  if (data) {
+  try {
+    debug('Loading store...');
+    const { data, error } = await sb.from('stores').select('*').eq('owner_id', currentUser.id).maybeSingle();
+    if (error) { debug('Store error: ' + error.message); return; }
     storeData = data;
-    updateHeader();
-    updateProfile();
+    if (data) {
+      updateHeader();
+      updateProfile();
+    }
+  } catch(e) {
+    debug('Store exception: ' + e.message);
   }
 }
 
 function updateHeader() {
   if (!storeData) return;
   document.getElementById('header-name').textContent = storeData.name || 'Mi Negocio';
-  document.getElementById('header-cat').textContent = storeData.category || 'Negocio';
-  const toggle = document.getElementById('online-toggle');
-  if (storeData.is_online) { toggle.classList.add('on'); toggle.classList.remove('off'); }
-  else { toggle.classList.add('off'); toggle.classList.remove('on'); }
+  document.getElementById('header-cat').textContent = storeData.category || '';
+  const t = document.getElementById('online-toggle');
+  t.className = 'toggle ' + (storeData.is_online ? 'on' : 'off');
 }
 
 async function toggleOnline() {
   if (!storeData) return;
   const newState = !storeData.is_online;
-  const { error } = await sb.from('stores').update({ is_online: newState }).eq('id', storeData.id);
-  if (error) { toast('Error al cambiar estado', 'error'); return; }
-  storeData.is_online = newState;
-  updateHeader();
-  updateProfile();
-  toast(newState ? '🟢 Estás en línea' : '⚫ Estás fuera de línea', newState ? 'success' : 'warning');
+  try {
+    const { error } = await sb.from('stores').update({ is_online: newState }).eq('id', storeData.id);
+    if (error) { toast('Error', 'error'); return; }
+    storeData.is_online = newState;
+    updateHeader(); updateProfile();
+    toast(newState ? '🟢 En línea' : '⚫ Fuera de línea', newState?'success':'warning');
+  } catch(e) { toast('Error de conexión', 'error'); }
 }
 
-// ── FCM (Capacitor nativo) ───────────────────────────────────
+// ── FCM ─────────────────────────────────────────────────────
 async function initFCM() {
   try {
-    // Detectar si estamos en Capacitor (bridge inyectado automáticamente)
-    const isNative = !!(window.Capacitor?.isNativePlatform?.());
-    if (!isNative) { console.log('[FCM] No nativo, omitiendo FCM'); return; }
-
-    // Acceder al plugin vía bridge de Capacitor
-    const PN = window.Capacitor.Plugins?.PushNotifications;
-    if (!PN) { console.warn('[FCM] Plugin PushNotifications no disponible'); return; }
-
-    // Solicitar permisos
+    const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    if (!isNative) { debug('FCM: no nativo'); return; }
+    debug('FCM: nativo detectado');
+    const PN = window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
+    if (!PN) { debug('FCM: plugin no disponible'); return; }
     const perm = await PN.requestPermissions();
-    if (perm.receive !== 'granted') { console.warn('[FCM] Permiso denegado'); return; }
-
-    // Registrar
+    if (perm.receive !== 'granted') { debug('FCM: permiso denegado'); return; }
     await PN.register();
-
-    // Escuchar token
+    debug('FCM: registrado');
     PN.addListener('registration', async (t) => {
-      console.log('[FCM] Token nativo:', t.value);
+      debug('FCM token: ' + (t.value||'').slice(0,20) + '...');
       await saveFcmToken(t.value);
     });
-
-    // Escuchar notificaciones entrantes (foreground)
-    PN.addListener('pushNotificationReceived', (notif) => {
-      console.log('[FCM] Notificación recibida:', notif);
+    PN.addListener('pushNotificationReceived', () => {
+      debug('FCM: push recibido');
       toast('🔔 ¡Nuevo pedido!', 'success');
       unreadCount++;
       updateOrderBadge();
       if (currentTab === 'pedidos') loadOrders();
       if (currentTab === 'dashboard') loadDashboard();
     });
-  } catch(e) {
-    console.warn('[FCM] Error init:', e.message);
-  }
+  } catch(e) { debug('FCM error: ' + e.message); }
 }
 
 async function saveFcmToken(token) {
   if (!currentUser) return;
-  const { error } = await sb.from('users').update({ fcm_token: token }).eq('id', currentUser.id);
-  if (error) console.warn('[FCM] Error guardando token:', error.message);
-  else console.log('[FCM] Token guardado');
+  try {
+    const { error } = await sb.from('users').update({ fcm_token: token }).eq('id', currentUser.id);
+    if (error) debug('Save token error: ' + error.message);
+    else debug('Token saved');
+  } catch(e) { debug('Save token exc: ' + e.message); }
 }
 
 // ── Navigation ───────────────────────────────────────────────
@@ -614,10 +474,9 @@ function switchTab(tab, el) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   if (el) el.classList.add('active');
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById('sec-' + tab).classList.add('active');
-  // Scroll to top
+  var sec = document.getElementById('sec-' + tab);
+  if (sec) sec.classList.add('active');
   document.getElementById('app-content').scrollTop = 0;
-  // Load data
   if (tab === 'dashboard') loadDashboard();
   if (tab === 'pedidos') loadOrders();
   if (tab === 'catalogo') loadCatalog();
@@ -626,218 +485,210 @@ function switchTab(tab, el) {
 
 // ── Dashboard ────────────────────────────────────────────────
 async function loadDashboard() {
-  if (!storeData) return;
-  const today = new Date().toISOString().split('T')[0];
+  if (!storeData) { debug('loadDashboard: no storeData'); return; }
+  var today = new Date().toISOString().split('T')[0];
+  debug('Dashboard load...');
 
-  // Pedidos de hoy
-  const { data: orders, count: ordersToday } = await sb
-    .from('orders').select('*', { count: 'exact', head: false })
-    .eq('store_id', storeData.id).gte('created_at', today)
-    .order('created_at', { ascending: false });
+  try {
+    // Pedidos de hoy
+    var { data: orders, error: err1, count: ordersToday } = await sb
+      .from('orders')
+      .select('*', { count: 'exact' })
+      .eq('store_id', storeData.id)
+      .gte('created_at', today)
+      .order('created_at', { ascending: false });
 
-  // Ventas hoy (de órdenes entregadas)
-  const totalSales = orders?.filter(o => o.status === 'delivered').reduce((s, o) => s + (o.total || 0), 0) || 0;
+    if (err1) { debug('Orders query error: ' + err1.message); return; }
 
-  // Pedidos pendientes
-  const pending = orders?.filter(o => ['pending','accepted','preparing','ready'].includes(o.status)).length || 0;
+    orders = orders || [];
+    // Ventas hoy
+    var totalSales = orders.filter(function(o){return o.status==='delivered'}).reduce(function(s,o){return s+(o.total||0)},0);
+    var pending = orders.filter(function(o){return ['pending','accepted','preparing','ready'].indexOf(o.status)>=0}).length;
 
-  // Productos activos
-  const { count: activeProducts } = await sb
-    .from('products').select('*', { count: 'exact', head: true })
-    .eq('store_id', storeData.id).eq('is_active', true);
+    // Productos activos
+    var { count: activeProducts, error: err2 } = await sb
+      .from('products')
+      .select('*', { count: 'exact' })
+      .eq('store_id', storeData.id)
+      .eq('is_active', true)
+      .limit(0);
 
-  // Rating
-  const rating = storeData.rating || 0;
+    if (err2) { debug('Products count error: ' + err2.message); }
 
-  // Actualizar KPIs
-  document.getElementById('kpi-grid').innerHTML = `
-    <div class="kpi-card kpi-accent">
-      <div class="kpi-icon">📦</div>
-      <div class="kpi-label">Pedidos hoy</div>
-      <div class="kpi-value">${ordersToday || 0}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon">💰</div>
-      <div class="kpi-label">Ventas hoy</div>
-      <div class="kpi-value">$${totalSales.toLocaleString('es-CL')}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon">⏳</div>
-      <div class="kpi-label">Pendientes</div>
-      <div class="kpi-value">${pending}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon">⭐</div>
-      <div class="kpi-label">Rating</div>
-      <div class="kpi-value">${rating.toFixed(1)}</div>
-      <div class="kpi-sub">${activeProducts || 0} productos activos</div>
-    </div>
-  `;
+    var rating = storeData.rating || 0;
 
-  // Pedidos recientes
-  const recent = (orders || []).slice(0, 5);
-  const rc = document.getElementById('recent-orders');
-  if (recent.length === 0) {
-    rc.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Sin pedidos hoy</div><div class="empty-sub">Tus pedidos aparecerán aquí</div></div>';
-  } else {
-    rc.innerHTML = recent.map(o => renderOrderCard(o)).join('');
+    // Render KPIs
+    document.getElementById('kpi-grid').innerHTML =
+      '<div class="kpi-card kpi-accent"><div class="kpi-icon">📦</div><div class="kpi-label">Pedidos hoy</div><div class="kpi-value">'+(ordersToday||0)+'</div></div>'+
+      '<div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-label">Ventas hoy</div><div class="kpi-value">$'+totalSales.toLocaleString('es-CL')+'</div></div>'+
+      '<div class="kpi-card"><div class="kpi-icon">⏳</div><div class="kpi-label">Pendientes</div><div class="kpi-value">'+pending+'</div></div>'+
+      '<div class="kpi-card"><div class="kpi-icon">⭐</div><div class="kpi-label">Rating</div><div class="kpi-value">'+rating.toFixed(1)+'</div><div class="kpi-sub">'+(activeProducts||0)+' activos</div></div>';
+
+    // Pedidos recientes
+    var recent = orders.slice(0, 5);
+    var rc = document.getElementById('recent-orders');
+    if (recent.length === 0) {
+      rc.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Sin pedidos hoy</div></div>';
+    } else {
+      rc.innerHTML = recent.map(function(o){return renderOrderCard(o,false)}).join('');
+    }
+    debug('Dashboard OK: '+(ordersToday||0)+' pedidos');
+  } catch(e) {
+    debug('Dashboard error: ' + e.message);
   }
 }
 
 // ── Orders ───────────────────────────────────────────────────
 async function loadOrders() {
   if (!storeData) return;
-  let q = sb.from('orders').select('*').eq('store_id', storeData.id).order('created_at', { ascending: false }).limit(50);
-  if (orderFilter !== 'all') q = q.eq('status', orderFilter);
-
-  const { data } = await q;
-  allOrders = data || [];
-  unreadCount = allOrders.filter(o => o.status === 'pending').length;
-  updateOrderBadge();
-  renderOrderFilters();
-  renderOrders();
+  debug('Loading orders...');
+  try {
+    var q = sb.from('orders').select('*').eq('store_id', storeData.id).order('created_at',{ascending:false}).limit(50);
+    if (orderFilter !== 'all') q = q.eq('status', orderFilter);
+    var { data, error } = await q;
+    if (error) {
+      debug('Orders error: ' + error.message);
+      document.getElementById('orders-list').innerHTML = '';
+      document.getElementById('orders-error').style.display = 'block';
+      document.getElementById('orders-error-msg').textContent = error.message;
+      document.getElementById('orders-empty').style.display = 'none';
+      return;
+    }
+    allOrders = data || [];
+    unreadCount = allOrders.filter(function(o){return o.status==='pending'}).length;
+    updateOrderBadge();
+    renderOrderFilters();
+    renderOrders();
+    document.getElementById('orders-error').style.display = 'none';
+    debug('Orders OK: ' + allOrders.length);
+  } catch(e) {
+    debug('Orders exception: ' + e.message);
+    document.getElementById('orders-list').innerHTML = '';
+    document.getElementById('orders-error').style.display = 'block';
+    document.getElementById('orders-error-msg').textContent = e.message;
+    document.getElementById('orders-empty').style.display = 'none';
+  }
 }
 
 function updateOrderBadge() {
-  const badge = document.getElementById('orders-badge');
-  if (unreadCount > 0) { badge.style.display = 'flex'; badge.textContent = unreadCount > 99 ? '99+' : unreadCount; }
-  else badge.style.display = 'none';
+  var badge = document.getElementById('orders-badge');
+  if (unreadCount > 0) { badge.textContent = unreadCount > 99 ? '99+' : unreadCount; badge.classList.add('show'); }
+  else badge.classList.remove('show');
 }
 
 function renderOrderFilters() {
-  const statuses = [
-    { key: 'all', label: 'Todos' },
-    { key: 'pending', label: 'Nuevos' },
-    { key: 'accepted', label: 'Aceptados' },
-    { key: 'preparing', label: 'Preparando' },
-    { key: 'ready', label: 'Listos' },
-    { key: 'delivered', label: 'Entregados' },
+  var statuses = [
+    {key:'all',label:'Todos'},{key:'pending',label:'Nuevos'},{key:'accepted',label:'Aceptados'},
+    {key:'preparing',label:'Preparando'},{key:'ready',label:'Listos'},{key:'delivered',label:'Entregados'}
   ];
-  document.getElementById('order-filters').innerHTML = statuses.map(s =>
-    `<span class="filter-chip${orderFilter===s.key?' active':''}" onclick="setOrderFilter('${s.key}')">${s.label}</span>`
-  ).join('');
+  document.getElementById('order-filters').innerHTML = statuses.map(function(s){
+    return '<span class="filter-chip'+(orderFilter===s.key?' active':'')+'" onclick="setOrderFilter(\''+s.key+'\')">'+s.label+'</span>';
+  }).join('');
 }
 
 function setOrderFilter(f) { orderFilter = f; loadOrders(); }
 
 function renderOrders() {
-  const el = document.getElementById('orders-list');
-  const empty = document.getElementById('orders-empty');
   if (allOrders.length === 0) {
-    el.innerHTML = ''; empty.style.display = 'block';
+    document.getElementById('orders-list').innerHTML = '';
+    document.getElementById('orders-empty').style.display = 'block';
   } else {
-    empty.style.display = 'none';
-    el.innerHTML = allOrders.map(o => renderOrderCard(o, true)).join('');
+    document.getElementById('orders-empty').style.display = 'none';
+    document.getElementById('orders-list').innerHTML = allOrders.map(function(o){return renderOrderCard(o,true)}).join('');
   }
 }
 
-function renderOrderCard(o, showActions = false) {
-  const statusLabels = {
-    pending:'Pendiente',accepted:'Aceptado',preparing:'Preparando',
-    ready:'Listo',assigned:'Repartidor asignado',pickup:'En retiro',
-    in_transit:'En camino',delivered:'Entregado',cancelled:'Cancelado'
-  };
-  const badgeClass = 'badge-' + ({
-    pending:'pending',accepted:'accepted',preparing:'preparing',
-    ready:'ready',assigned:'assigned',pickup:'pickup',
-    in_transit:'preparing',delivered:'delivered',cancelled:'cancelled'
-  }[o.status] || 'pending');
+function renderOrderCard(o, showActions) {
+  var labels = {pending:'Pendiente',accepted:'Aceptado',preparing:'Preparando',ready:'Listo',assigned:'Asignado',pickup:'En retiro',in_transit:'En camino',delivered:'Entregado',cancelled:'Cancelado'};
+  var badgeMap = {pending:'badge-pending',accepted:'badge-accepted',preparing:'badge-preparing',ready:'badge-ready',assigned:'badge-assigned',pickup:'badge-ready',in_transit:'badge-preparing',delivered:'badge-delivered',cancelled:'badge-cancelled'};
+  var time = o.created_at ? new Date(o.created_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : '';
+  var items = [];
+  try { items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []); } catch(e){}
+  var itemNames = items.slice(0,3).map(function(i){return i.name || i.product_name || 'Producto'}).join(', ');
+  if (items.length > 3) itemNames += ' +' + (items.length-3);
+  var total = (o.total||0).toLocaleString('es-CL');
 
-  const time = o.created_at ? new Date(o.created_at).toLocaleTimeString('es-CL', {hour:'2-digit',minute:'2-digit'}) : '';
-  const items = o.items ? (Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]')) : [];
-  const itemNames = items.slice(0,3).map(i => i.name || i.product_name || 'Producto').join(', ') + (items.length > 3 ? ` +${items.length-3}` : '');
-  const total = (o.total || 0).toLocaleString('es-CL');
-
-  let actionsHtml = '';
+  var actionsHtml = '';
   if (showActions && o.status === 'pending') {
-    actionsHtml = `
-      <div class="order-actions">
-        <button class="btn btn-sm" style="background:var(--error);color:#fff" onclick="updateOrderStatus('${o.id}','cancelled')">✕ Rechazar</button>
-        <button class="btn btn-sm" style="background:var(--success);color:#fff" onclick="updateOrderStatus('${o.id}','accepted')">✓ Aceptar</button>
-      </div>`;
+    actionsHtml = '<div class="order-actions"><button class="btn btn-sm" style="background:var(--error);color:#fff" onclick="updateOrderStatus(\''+o.id+'\',\'cancelled\')">✕ Rechazar</button><button class="btn btn-sm" style="background:var(--success);color:#fff" onclick="updateOrderStatus(\''+o.id+'\',\'accepted\')">✓ Aceptar</button></div>';
   } else if (showActions && o.status === 'accepted') {
-    actionsHtml = `
-      <div class="order-actions">
-        <button class="btn btn-sm" style="background:var(--secondary);color:#fff;flex:1" onclick="updateOrderStatus('${o.id}','preparing')">👨‍🍳 Preparando</button>
-      </div>`;
+    actionsHtml = '<div class="order-actions"><button class="btn btn-sm" style="background:var(--secondary);color:#fff;flex:1" onclick="updateOrderStatus(\''+o.id+'\',\'preparing\')">👨‍🍳 Preparando</button></div>';
   } else if (showActions && o.status === 'preparing') {
-    actionsHtml = `
-      <div class="order-actions">
-        <button class="btn btn-sm" style="background:var(--success);color:#fff;flex:1" onclick="updateOrderStatus('${o.id}','ready')">✅ Listo</button>
-      </div>`;
+    actionsHtml = '<div class="order-actions"><button class="btn btn-sm" style="background:var(--success);color:#fff;flex:1" onclick="updateOrderStatus(\''+o.id+'\',\'ready\')">✅ Listo</button></div>';
   }
 
-  return `
-    <div class="card order-card">
-      <div class="order-header">
-        <span class="order-id">#${(o.id||'').slice(0,8)} · ${time}</span>
-        <span class="order-badge ${badgeClass}">${statusLabels[o.status]||o.status}</span>
-      </div>
-      <div class="order-body">
-        <div>
-          <div class="order-customer">${o.customer_name || o.delivery_address || 'Cliente'}</div>
-          <div class="order-items">${itemNames || 'Sin productos'}</div>
-        </div>
-        <div class="order-total">$${total}</div>
-      </div>
-      ${actionsHtml}
-    </div>`;
+  return '<div class="card"><div class="order-header"><span class="order-id">#'+(o.id||'').slice(0,8)+' · '+time+'</span><span class="order-badge '+(badgeMap[o.status]||'badge-pending')+'">'+(labels[o.status]||o.status)+'</span></div><div class="order-body"><div><div class="order-customer">'+(o.customer_name||o.customer_phone||'Cliente')+'</div><div class="order-items">'+(itemNames||'Sin productos')+'</div></div><div class="order-total">$'+total+'</div></div>'+actionsHtml+'</div>';
 }
 
 async function updateOrderStatus(orderId, newStatus) {
-  const { error } = await sb.from('orders').update({ status: newStatus }).eq('id', orderId);
-  if (error) { toast('Error: ' + error.message, 'error'); return; }
-  toast('Pedido actualizado', 'success');
-  loadOrders();
-  loadDashboard();
+  try {
+    var { error } = await sb.from('orders').update({status:newStatus}).eq('id',orderId);
+    if (error) { toast('Error: '+error.message,'error'); return; }
+    toast('Pedido actualizado','success');
+    loadOrders(); loadDashboard();
+  } catch(e) { toast('Error de conexión','error'); }
 }
 
 // ── Catalog ──────────────────────────────────────────────────
-let catalogFilter = 'all';
+var catalogFilter = 'all';
 async function loadCatalog() {
   if (!storeData) return;
-  let q = sb.from('products').select('*').eq('store_id', storeData.id).order('name').limit(100);
-  const { data } = await q;
-  const products = data || [];
+  debug('Loading catalog...');
+  try {
+    var { data, error } = await sb.from('products').select('*').eq('store_id',storeData.id).order('name').limit(100);
+    if (error) {
+      debug('Catalog error: ' + error.message);
+      document.getElementById('catalog-list').innerHTML = '';
+      document.getElementById('catalog-empty').style.display = 'none';
+      document.getElementById('catalog-error').style.display = 'block';
+      document.getElementById('catalog-error-msg').textContent = error.message;
+      return;
+    }
+    var products = data || [];
+    document.getElementById('catalog-error').style.display = 'none';
 
-  // Build category filter
-  const cats = [...new Set(products.map(p => p.category || 'Sin categoría'))];
-  document.getElementById('catalog-filters').innerHTML =
-    '<span class="filter-chip'+(catalogFilter==='all'?' active':'')+'" onclick="setCatalogFilter(\'all\')">Todos</span>' +
-    cats.map(c => `<span class="filter-chip${catalogFilter===c?' active':''}" onclick="setCatalogFilter('${c.replace(/'/g,"\\'")}')">${c}</span>`).join('');
+    var cats = [];
+    var seen = {};
+    products.forEach(function(p){
+      var c = p.category || 'Sin categoría';
+      if (!seen[c]) { seen[c]=true; cats.push(c); }
+    });
 
-  const filtered = catalogFilter === 'all' ? products : products.filter(p => (p.category || 'Sin categoría') === catalogFilter);
-  const el = document.getElementById('catalog-list');
-  const empty = document.getElementById('catalog-empty');
+    document.getElementById('catalog-filters').innerHTML =
+      '<span class="filter-chip'+(catalogFilter==='all'?' active':'')+'" onclick="setCatalogFilter(\'all\')">Todos</span>'+
+      cats.map(function(c){return '<span class="filter-chip'+(catalogFilter===c?' active':'')+'" onclick="setCatalogFilter(\''+c.replace(/'/g,"\\'")+'\')">'+c+'</span>'}).join('');
 
-  if (filtered.length === 0) {
-    el.innerHTML = ''; empty.style.display = 'block';
-  } else {
-    empty.style.display = 'none';
-    el.innerHTML = filtered.map(p => `
-      <div class="card">
-        <div class="product-card">
-          <div class="product-img" style="${p.image_url ? `background-image:url('${p.image_url}')` : ''}">${!p.image_url ? (p.category==='Restaurante'?'🍽️':'📦') : ''}</div>
-          <div class="product-info">
-            <div class="product-name">${p.name}</div>
-            <div class="product-cat">${p.category||'Sin categoría'} · ${p.is_active ? 'Visible' : 'Oculto'}</div>
-          </div>
-          <div style="text-align:right">
-            <div class="product-price">$${(p.price||0).toLocaleString('es-CL')}</div>
-            <button class="product-toggle ${p.is_active?'active':'inactive'}" onclick="toggleProduct('${p.id}',${!p.is_active})" style="margin-top:4px"></button>
-          </div>
-        </div>
-      </div>`).join('');
+    var filtered = catalogFilter==='all' ? products : products.filter(function(p){return (p.category||'Sin categoría')===catalogFilter});
+
+    if (filtered.length === 0) {
+      document.getElementById('catalog-list').innerHTML = '';
+      document.getElementById('catalog-empty').style.display = 'block';
+    } else {
+      document.getElementById('catalog-empty').style.display = 'none';
+      document.getElementById('catalog-list').innerHTML = filtered.map(function(p){
+        var imgStyle = p.image_url ? 'background-image:url(\''+p.image_url+'\')' : '';
+        return '<div class="card"><div class="product-row"><div class="product-img" style="'+imgStyle+'">'+(p.image_url?'':'📦')+'</div><div class="product-info"><div class="product-name">'+p.name+'</div><div class="product-cat">'+(p.category||'Sin categoría')+' · '+(p.is_active?'Visible':'Oculto')+'</div></div><div style="text-align:right"><div class="product-price">$'+(p.price||0).toLocaleString('es-CL')+'</div><button class="prod-toggle '+(p.is_active?'on':'off')+'" onclick="toggleProduct(\''+p.id+'\','+!p.is_active+')" style="margin-top:4px"></button></div></div></div>';
+      }).join('');
+    }
+    debug('Catalog OK: ' + products.length);
+  } catch(e) {
+    debug('Catalog exception: ' + e.message);
+    document.getElementById('catalog-list').innerHTML = '';
+    document.getElementById('catalog-empty').style.display = 'none';
+    document.getElementById('catalog-error').style.display = 'block';
+    document.getElementById('catalog-error-msg').textContent = e.message;
   }
 }
 
 function setCatalogFilter(f) { catalogFilter = f; loadCatalog(); }
 
 async function toggleProduct(id, active) {
-  const { error } = await sb.from('products').update({ is_active: active }).eq('id', id);
-  if (error) { toast('Error: ' + error.message, 'error'); return; }
-  toast(active ? 'Producto visible' : 'Producto oculto', 'success');
-  loadCatalog();
+  try {
+    var { error } = await sb.from('products').update({is_active:active}).eq('id',id);
+    if (error) { toast('Error: '+error.message,'error'); return; }
+    toast(active?'Visible':'Oculto','success');
+    loadCatalog();
+  } catch(e) { toast('Error de conexión','error'); }
 }
 
 // ── Profile ──────────────────────────────────────────────────
@@ -848,15 +699,17 @@ function updateProfile() {
     ? '<span class="online-dot green"></span> En línea'
     : '<span class="online-dot gray"></span> Fuera de línea';
   document.getElementById('prof-cat').textContent = storeData.category || '—';
-  document.getElementById('header-avatar').textContent = (storeData.name || 'N')[0].toUpperCase();
+  document.getElementById('header-avatar').textContent = (storeData.name||'N')[0].toUpperCase();
 }
 
 // ── Toast ────────────────────────────────────────────────────
-function toast(msg, type = 'success') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast toast-' + type + ' show';
-  setTimeout(() => el.classList.remove('show'), 2500);
+var toastTimer;
+function toast(msg, type) {
+  type = type || 'success';
+  var el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast toast-'+type+' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){el.classList.remove('show')}, 2500);
 }
 </script>
 
