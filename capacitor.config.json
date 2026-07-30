@@ -2,11 +2,6 @@
   "appId": "com.godeli.aliados",
   "appName": "Go Aliados",
   "webDir": "www",
-  "server": {
-    "url": "https://godeli.cl/aliados",
-    "cleartext": false,
-    "allowNavigation": ["godeli.cl", "www.godeli.cl", "yxseolcaububyifhksud.supabase.co"]
-  },
   "plugins": {
     "PushNotifications": {
       "presentationOptions": ["badge", "sound", "alert"]
