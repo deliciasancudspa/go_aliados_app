@@ -396,6 +396,7 @@ async function initApp() {
   }
   debug('Store: ' + storeData.name);
   initFCM();
+  setupRealtime();
   loadDashboard();
   setInterval(() => {
     if (currentTab === 'pedidos') loadOrders();
@@ -629,16 +630,43 @@ function renderOrderCard(o, showActions) {
   if (items.length > 3) itemNames += ' +' + (items.length-3);
   var total = (o.total||0).toLocaleString('es-CL');
 
+  var isDelivery = !o.order_mode || (o.order_mode !== 'pickup' && o.order_mode !== 'dine_in');
+  var needsRider = isDelivery && !o.deliverer_id && o.rider_search_status !== 'searching' && o.rider_search_status !== 'assigned' && o.rider_search_status !== 'external' && o.rider_search_status !== 'needs_manual';
+  var isSearching = o.rider_search_status === 'searching';
+  var riderAssigned = o.rider_search_status === 'assigned' || o.rider_search_status === 'external' || !!o.deliverer_id;
+
+  // Rider status badge
+  var riderBadge = '';
+  if (isSearching) {
+    riderBadge = '<div style="margin-top:6px;font-size:10px;color:#F59E0B;font-weight:700">🔍 Buscando repartidor...</div>';
+  } else if (riderAssigned && !o.deliverer_id) {
+    riderBadge = '<div style="margin-top:6px;font-size:10px;color:#8B5CF6;font-weight:700">🛵 Repartidor asignado</div>';
+  } else if (o.deliverer_id) {
+    riderBadge = '<div style="margin-top:6px;font-size:10px;color:#22C55E;font-weight:700">🛵 Rider en camino</div>';
+  }
+
   var actionsHtml = '';
   if (showActions && o.status === 'pending') {
     actionsHtml = '<div class="order-actions"><button class="btn btn-sm" style="background:var(--error);color:#fff" onclick="updateOrderStatus(\''+o.id+'\',\'cancelled\')">✕ Rechazar</button><button class="btn btn-sm" style="background:var(--success);color:#fff" onclick="updateOrderStatus(\''+o.id+'\',\'accepted\')">✓ Aceptar</button></div>';
   } else if (showActions && o.status === 'accepted') {
-    actionsHtml = '<div class="order-actions"><button class="btn btn-sm" style="background:var(--secondary);color:#fff;flex:1" onclick="updateOrderStatus(\''+o.id+'\',\'preparing\')">👨‍🍳 Preparando</button></div>';
+    actionsHtml = '<div class="order-actions"><button class="btn btn-sm" style="background:var(--secondary);color:#fff;flex:1" onclick="updateOrderStatus(\''+o.id+'\',\'preparing\')">👨‍🍳 Preparando</button>';
+    // Llamar Rider button for delivery orders
+    if (needsRider) {
+      actionsHtml += '<button class="btn btn-sm" style="background:var(--primary);color:#fff;flex:1" onclick="startDispatch(\''+o.id+'\')">🛵 Llamar Rider</button>';
+    }
+    actionsHtml += '</div>';
   } else if (showActions && o.status === 'preparing') {
-    actionsHtml = '<div class="order-actions"><button class="btn btn-sm" style="background:var(--success);color:#fff;flex:1" onclick="updateOrderStatus(\''+o.id+'\',\'ready\')">✅ Listo</button></div>';
+    actionsHtml = '<div class="order-actions"><button class="btn btn-sm" style="background:var(--success);color:#fff;flex:1" onclick="updateOrderStatus(\''+o.id+'\',\'ready\')">✅ Listo</button>';
+    // Llamar Rider button for delivery orders
+    if (needsRider) {
+      actionsHtml += '<button class="btn btn-sm" style="background:var(--primary);color:#fff;flex:1" onclick="startDispatch(\''+o.id+'\')">🛵 Llamar Rider</button>';
+    }
+    actionsHtml += '</div>';
+  } else if (showActions && o.status === 'ready' && needsRider && !isSearching) {
+    actionsHtml = '<div class="order-actions"><button class="btn btn-sm" style="background:var(--primary);color:#fff;flex:1" onclick="startDispatch(\''+o.id+'\')">🛵 Llamar Rider</button></div>';
   }
 
-  return '<div class="card"><div class="order-header"><span class="order-id">#'+(o.id||'').slice(0,8)+' · '+time+'</span><span class="order-badge '+(badgeMap[o.status]||'badge-pending')+'">'+(labels[o.status]||o.status)+'</span></div><div class="order-body"><div><div class="order-customer">'+(o.customer_name||o.customer_phone||'Cliente')+'</div><div class="order-items">'+(itemNames||'Sin productos')+'</div></div><div class="order-total">$'+total+'</div></div>'+actionsHtml+'</div>';
+  return '<div class="card"><div class="order-header"><span class="order-id">#'+(o.id||'').slice(0,8)+' · '+time+'</span><span class="order-badge '+(badgeMap[o.status]||'badge-pending')+'">'+(labels[o.status]||o.status)+'</span></div><div class="order-body"><div><div class="order-customer">'+(o.customer_name||o.customer_phone||'Cliente')+'</div><div class="order-items">'+(itemNames||'Sin productos')+'</div></div><div class="order-total">$'+total+'</div></div>'+riderBadge+actionsHtml+'</div>';
 }
 
 async function updateOrderStatus(orderId, newStatus) {
@@ -648,6 +676,85 @@ async function updateOrderStatus(orderId, newStatus) {
     toast('Pedido actualizado','success');
     loadOrders(); loadDashboard();
   } catch(e) { toast('Error de conexión','error'); }
+}
+
+// ── Dispatch: Llamar Rider ───────────────────────────────────
+async function startDispatch(orderId) {
+  try {
+    // Actualizar UI localmente para feedback inmediato
+    var order = allOrders.find(function(o){return o.id === orderId});
+    if (order) order.rider_search_status = 'searching';
+    renderOrders();
+
+    var { data, error } = await sb.rpc('start_dispatch', { p_order_id: orderId });
+    if (error) {
+      debug('start_dispatch error: ' + error.message);
+      if (order) order.rider_search_status = null;
+      renderOrders();
+      toast('Error: ' + error.message, 'error');
+      return;
+    }
+    debug('start_dispatch: ' + data);
+    if (data === 'forbidden') {
+      if (order) order.rider_search_status = null;
+      renderOrders();
+      toast('No tienes permiso', 'error');
+      return;
+    }
+    if (data === 'out_of_range') {
+      if (order) order.rider_search_status = null;
+      renderOrders();
+      toast('Distancia de delivery excede el máximo', 'error');
+      return;
+    }
+    if (data && data.indexOf('needs_manual') === 0) {
+      toast('Sin repartidores disponibles. Un admin lo asignará manualmente.', 'warning');
+    } else {
+      toast('🔍 Buscando repartidor cercano...', 'success');
+    }
+    // Recargar después de un momento para ver el estado actualizado
+    setTimeout(function(){ loadOrders(); loadDashboard(); }, 2000);
+  } catch(e) {
+    debug('start_dispatch exc: ' + e.message);
+    toast('Error de conexión', 'error');
+  }
+}
+
+// ── Supabase Realtime ────────────────────────────────────────
+function setupRealtime() {
+  if (!storeData) return;
+  try {
+    var channel = sb.channel('aliados-orders-' + storeData.id);
+    channel
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'orders', filter: 'store_id=eq.' + storeData.id },
+        function(payload) {
+          debug('Realtime: nuevo pedido!');
+          var newOrder = payload.new;
+          toast('🛎️ ¡Nuevo pedido! $' + (newOrder.total||0).toLocaleString('es-CL'), 'success');
+          unreadCount++;
+          updateOrderBadge();
+          if (currentTab === 'pedidos') loadOrders();
+          if (currentTab === 'dashboard') loadDashboard();
+        }
+      )
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: 'store_id=eq.' + storeData.id },
+        function(payload) {
+          debug('Realtime: pedido actualizado');
+          // Refrescar si estamos en la pantalla de pedidos o dashboard
+          if (currentTab === 'pedidos') loadOrders();
+          if (currentTab === 'dashboard') loadDashboard();
+        }
+      )
+      .subscribe(function(status, err) {
+        if (status === 'SUBSCRIBED') debug('Realtime: suscrito');
+        else if (err) debug('Realtime error: ' + err);
+        else debug('Realtime status: ' + status);
+      });
+  } catch(e) {
+    debug('Realtime setup error: ' + e.message);
+  }
 }
 
 // ── Catalog ──────────────────────────────────────────────────
