@@ -53,12 +53,13 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease
 
-      - name: Find APK
+      - name: Find and rename APK
         id: apk
         run: |
           APK_PATH=$(find android/app/build/outputs -name "*.apk" -type f | head -1)
-          echo "path=$APK_PATH" >> "$GITHUB_OUTPUT"
-          echo "APK encontrado en: $APK_PATH"
+          cp "$APK_PATH" go-aliados.apk
+          echo "path=go-aliados.apk" >> "$GITHUB_OUTPUT"
+          echo "APK copiado a: go-aliados.apk"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -66,3 +67,15 @@ jobs:
           name: go-aliados-apk
           path: ${{ steps.apk.outputs.path }}
           if-no-files-found: error
+
+      - name: Publicar en GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Go Aliados — Última versión"
+          body: "APK firmado con notificaciones push nativas. Descargar e instalar en Android.\n\n📱 Mínimo: Android 7.0\n🔔 Notificaciones instantáneas de nuevos pedidos\n🔄 La app se actualiza sola desde godeli.cl"
+          files: ${{ steps.apk.outputs.path }}
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
