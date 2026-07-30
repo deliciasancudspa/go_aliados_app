@@ -1,4 +1,4 @@
-package cl.godeli.aliados;
+package com.godeli.aliados;
 
 import com.getcapacitor.BridgeActivity;
 
